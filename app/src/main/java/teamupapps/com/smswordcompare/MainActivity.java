@@ -13,11 +13,16 @@ import android.view.ViewGroup;
 import android.os.Build;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +67,9 @@ public class MainActivity extends Activity {
     public static class PlaceholderFragment extends Fragment {
         int friendCount;
         int userCount;
+
+        Thread user;
+        Thread friend;
         public PlaceholderFragment() {
         }
 
@@ -70,23 +78,15 @@ public class MainActivity extends Activity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-
-
            final ListView listView = (ListView) rootView.findViewById(R.id.listView);
 
-
-
-            final Map<String, String> countMap;// = new HashMap<String, String>();
+            final Map<String, String> countMap;
              countMap = Utils.getContactList(getActivity());
             final String names[];
 
-           // names = countMap.values().toArray(new String[0]);
-
             Set<String> keys = countMap.keySet();
 
-
             names = keys.toArray(new String[0]);
-            //countMap.
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_list_item_1, android.R.id.text1, names);
@@ -102,15 +102,27 @@ public class MainActivity extends Activity {
                     int itemPosition     = position;
                     String  itemValue    = (String) listView.getItemAtPosition(position);
 
+                    DatePicker datePicker = (DatePicker) getActivity().findViewById(R.id.datePicker1);
+                    int day = datePicker.getDayOfMonth();
+                    int month = datePicker.getMonth() + 1;
+                    int year = datePicker.getYear();
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(year, datePicker.getMonth(), day);
+
+                    Date dateNow = calendar.getTime();
+                    SimpleDateFormat dateformatJava = new SimpleDateFormat("dd-MMM-yyyy");
+                    String date_to_string = dateformatJava.format(dateNow);
+
                     TextView heading = (TextView) getActivity().findViewById(R.id.tBox);
 
                 String number = Utils.getContactNumber(names[position],countMap);
 
-                    friendCount = Utils.sortFriendsWords(getActivity(),number);
-                    userCount = Utils.sortUserWords(getActivity(),number);
+                    user = Utils.sortUserWords(getActivity(), number);
+                    friend = Utils.sortFriendsWords(getActivity(),number);
 
-                    Log.i("FC ",""+number);
-                    heading.setText("Them:  "+friendCount+"  You: "+userCount);
+
+                   heading.setText("Them:  "+friend.getWordCountfromDate(date_to_string)+"  You: "+user.getWordCountfromDate(date_to_string));
                 }
 
             });

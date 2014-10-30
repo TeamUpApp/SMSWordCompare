@@ -14,13 +14,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <DatePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/datePicker1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/listView"
-        android:layout_below="@+id/tBox"
-        android:layout_toRightOf="@+id/tBox"
-        android:layout_toEndOf="@+id/tBox"
-        android:layout_marginTop="136dp" />
+        android:layout_below="@+id/datePicker1"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="48dp"
+        android:layout_marginBottom="27dp" />
 
 </RelativeLayout>

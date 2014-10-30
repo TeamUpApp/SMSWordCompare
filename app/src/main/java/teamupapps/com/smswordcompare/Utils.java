@@ -6,8 +6,11 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.DatePicker;
 
 import java.lang.reflect.Array;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
@@ -18,57 +21,73 @@ import java.util.TreeSet;
  */
 public class Utils {
 
-    public static int sortFriendsWords(Context context,String match){
+    public static Thread sortFriendsWords(Context context,String match){
         Cursor cursor = context.getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
         String line;
         String matchCheck;
         int num = 0;
+        int smsWordcount = 0;
+        Long date;
+        SMS[] SMSA = new SMS[cursor.getCount()];
         if (cursor.moveToFirst()) {
             for (int i = 0; i < cursor.getCount(); i++) {
                 line = cursor.getString(cursor.getColumnIndexOrThrow("body")).toString();
                 matchCheck = cursor.getString(cursor.getColumnIndexOrThrow("address"));
-                if (match.equalsIgnoreCase(matchCheck)) {
-
-                    String[] words = line.split("\\s+");//"[^A-ZÃ…Ã„Ã–a-zÃ¥Ã¤Ã¶]+"
-                    for (String word : words) {
-                        if ("".equals(word)) {
-                            continue;
-                        }
-                        num++;
-                    }
-                }
-                cursor.moveToNext();
-            }
-        }
-        cursor.close();
-
-        return num;
-    }
-
-    public  static int sortUserWords(Context context,String match){
-        Cursor cursor = context.getContentResolver().query(Uri.parse("content://sms/sent"), null, null, null, null);
-        String line;
-        String matchCheck;
-        int num = 0;
-        if (cursor.moveToFirst()) {
-            for (int i = 0; i < cursor.getCount(); i++) {
-                line = cursor.getString(cursor.getColumnIndexOrThrow("body")).toString();
-                matchCheck = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+                date = cursor.getLong(cursor.getColumnIndexOrThrow("date"));
                 if (match.equalsIgnoreCase(matchCheck)) {
                     String[] words = line.split("[^A-ZÃ…Ã„Ã–a-zÃ¥Ã¤Ã¶]+");
                     for (String word : words) {
                         if ("".equals(word)) {
                             continue;
                         }
+                        smsWordcount++;
                         num++;
                     }
+                    SMSA[i] = new SMS(matchCheck,line,date,smsWordcount);
                 }
+
+
                 cursor.moveToNext();
+                smsWordcount = 0;
             }
         }
         cursor.close();
 
-        return num;
+        return new Thread(match,SMSA,num);
+    }
+
+    public  static Thread sortUserWords(Context context,String match){
+        Cursor cursor = context.getContentResolver().query(Uri.parse("content://sms/sent"), null, null, null, null);
+        String line;
+        String matchCheck;
+        int num = 0;
+        int smsWordcount = 0;
+        Long date;
+        SMS[] SMSA = new SMS[cursor.getCount()];
+        if (cursor.moveToFirst()) {
+            for (int i = 0; i < cursor.getCount(); i++) {
+                line = cursor.getString(cursor.getColumnIndexOrThrow("body")).toString();
+                matchCheck = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+                date = cursor.getLong(cursor.getColumnIndexOrThrow("date"));
+                if (match.equalsIgnoreCase(matchCheck)) {
+                    String[] words = line.split("[^A-ZÃ…Ã„Ã–a-zÃ¥Ã¤Ã¶]+");
+                    for (String word : words) {
+                        if ("".equals(word)) {
+                            continue;
+                        }
+                        smsWordcount++;
+                        num++;
+                    }
+                    SMSA[i] = new SMS(matchCheck,line,date,smsWordcount);
+                }
+
+                cursor.moveToNext();
+                smsWordcount = 0;
+            }
+        }
+        cursor.close();
+
+        return new Thread(match,SMSA,num);
     }
 
     public static Map getContactList(Context context){
@@ -122,5 +141,21 @@ public class Utils {
         return CountryZipCode;
     }
 
+    public static String getDateWithoutTime(String DateToChange){
+        String date = "";
+        String[] words = DateToChange.split("\\s+");
 
+        date = words[2]+"-"+words[1]+"-"+words[5];
+
+        return date;
+    }
+
+    public static String millisToDate(long currentTime) {
+        String finalDate;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(currentTime);
+        Date date = calendar.getTime();
+        finalDate = date.toString();
+        return finalDate;
+    }
 }
